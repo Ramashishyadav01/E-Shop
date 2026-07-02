@@ -611,15 +611,21 @@ export const deleteCategoryDashboardAction =
     }
   };
 
-  export const getAllSellersDashboard =
+export const getAllSellersDashboard =
   (queryString) => async (dispatch, getState) => {
     const { user } = getState().auth;
     try {
       dispatch({ type: "IS_FETCHING" });
       const { data } = await api.get(`/auth/sellers?${queryString}`);
+      
+      const mappedSellers = data.content.map((seller) => ({
+        ...seller,
+        userId: seller._id || seller.userId,
+      }));  // ← closed the map here
+
       dispatch({
         type: "GET_SELLERS",
-        payload: data["content"],
+        payload: mappedSellers,  // ← only one payload, using mappedSellers
         pageNumber: data["pageNumber"],
         pageSize: data["pageSize"],
         totalElements: data["totalElements"],

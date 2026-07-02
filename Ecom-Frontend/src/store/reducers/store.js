@@ -1,3 +1,4 @@
+
 import { configureStore } from "@reduxjs/toolkit";
 import { productReducer } from "./ProductReducer";
 import { errorReducer } from "./errorReducer";
@@ -8,20 +9,28 @@ import { adminReducer } from "./adminReducer";
 import { orderReducer } from "./orderReducer";
 import { sellerReducer } from "./sellerReducer";
 
-const user = localStorage.getItem("auth")
-    ? JSON.parse(localStorage.getItem("auth"))
-    : null;
+const safeGetLocalStorage = (key) => {
+    try {
+        return localStorage.getItem(key);
+    } catch {
+        return null;
+    }
+};
 
-const cartItems = localStorage.getItem("cartItems")
-    ? JSON.parse(localStorage.getItem("cartItems"))
-    : [];
+const safeParseJSON = (value, fallback) => {
+    try {
+        return value ? JSON.parse(value) : fallback;
+    } catch {
+        return fallback;
+    }
+};
 
-const selectUserCheckoutAddress = localStorage.getItem("CHECKOUT_ADDRESS")
-    ? JSON.parse(localStorage.getItem("CHECKOUT_ADDRESS"))
-    : [];
+const user = safeParseJSON(safeGetLocalStorage("auth"), null);
+const cartItems = safeParseJSON(safeGetLocalStorage("cartItems"), []);
+const selectUserCheckoutAddress = safeParseJSON(safeGetLocalStorage("CHECKOUT_ADDRESS"), null);
 
 const initialState = {
-    auth: { user: user, selectUserCheckoutAddress },
+    auth: { user, selectUserCheckoutAddress },
     carts: { cart: cartItems },
 };
 

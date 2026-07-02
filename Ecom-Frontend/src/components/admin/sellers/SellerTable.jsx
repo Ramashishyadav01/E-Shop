@@ -12,7 +12,8 @@ const SellerTable = ({ sellers, pagination }) => {
 
   const tableRecords = sellers?.map((item) => {
     return {
-      id: item.userId,
+      // id: item.userId,
+      id: item._id || item.userId || item.id,
       username: item.username,
       email: item.email,
     };

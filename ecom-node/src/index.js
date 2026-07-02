@@ -1,4 +1,4 @@
-// 1. Load Environment Variables FIRST
+
 const dotenv = require('dotenv');
 dotenv.config();
 
@@ -70,3 +70,5 @@ app.listen(PORT, () => {
 });
 
 module.exports = app;
+
+
