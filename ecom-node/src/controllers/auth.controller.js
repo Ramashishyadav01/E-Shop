@@ -135,4 +135,34 @@ const getAllSellers = async (req, res) => {
   }
 };
 
-module.exports = { signin, signup, getCurrentUsername, getUserDetails, signout, getAllSellers,uploadProfilePicture };
+// POST /api/auth/forgot-password
+const forgotPassword = async (req, res) => {
+  try {
+    const { username, email, newPassword } = req.body;
+
+    if (!username && !email) {
+      return res.status(400).json({ message: 'Username or Email is required', status: false });
+    }
+    if (!newPassword || newPassword.trim().length < 6) {
+      return res.status(400).json({ message: 'New password must be at least 6 characters long', status: false });
+    }
+
+    const query = username ? { userName: username } : { email: email };
+    const user = await User.findOne(query);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found with provided credentials', status: false });
+    }
+
+    const hashed = await bcrypt.hash(newPassword, 10);
+    user.password = hashed;
+    await user.save();
+
+    return res.status(200).json({ message: 'Password updated successfully! You can now login.', status: true });
+  } catch (err) {
+    console.error("🚨 FORGOT PASSWORD ERROR:", err);
+    return res.status(500).json({ message: err.message || 'Internal Server Error during password reset' });
+  }
+};
+
+module.exports = { signin, signup, getCurrentUsername, getUserDetails, signout, getAllSellers, uploadProfilePicture, forgotPassword };

@@ -1,7 +1,7 @@
 const { upload } = require('../utils/file.utils');
 const express = require('express');
 const router = express.Router();
-const { signin, signup, getCurrentUsername, getUserDetails, signout, getAllSellers,uploadProfilePicture } = require('../controllers/auth.controller');
+const { signin, signup, getCurrentUsername, getUserDetails, signout, getAllSellers, uploadProfilePicture, forgotPassword } = require('../controllers/auth.controller');
 const { verifyToken, hasRole } = require('../middleware/auth.middleware');
 
 /**
@@ -66,6 +66,7 @@ router.post('/signin', signin);
  *         description: User registered successfully
  */
 router.post('/signup', signup);
+router.post('/forgot-password', forgotPassword);
 router.get('/username', verifyToken, getCurrentUsername);
 router.get('/user', verifyToken, getUserDetails);
 router.post('/signout', signout);

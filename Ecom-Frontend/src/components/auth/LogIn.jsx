@@ -64,6 +64,14 @@ const LogIn = () => {
                         register={register}
                         errors={errors}
                     />
+
+                    <div className="flex justify-end -mt-1">
+                        <Link
+                            to="/forgot-password"
+                            className="text-xs font-semibold text-slate-700 hover:text-black underline">
+                            Forgot Password?
+                        </Link>
+                    </div>
                 </div>
 
                 <button

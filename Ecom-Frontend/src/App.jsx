@@ -12,6 +12,7 @@ import Cart from './components/cart/Cart'
 import LogIn from './components/auth/LogIn'
 import PrivateRoute from './components/PrivateRoute'
 import Register from './components/auth/Register'
+import ForgotPassword from './components/auth/ForgotPassword'
 import Checkout from './components/checkout/Checkout'
 import PaymentConfirmation from './components/checkout/PaymentConfirmation'
 import Profile from './components/Profile'
@@ -41,6 +42,7 @@ function App() {
   <Route element={<PrivateRoute publicPage />}>
     <Route path='/login' element={<LogIn />} />
     <Route path='/register' element={<Register />} />
+    <Route path='/forgot-password' element={<ForgotPassword />} />
   </Route>
 
   {/* Protected Routes */}

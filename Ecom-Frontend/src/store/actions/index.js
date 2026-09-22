@@ -160,6 +160,22 @@ export const registerNewUser
         }
 };
 
+export const resetUserPassword
+    = (sendData, toast, reset, navigate, setLoader) => async (dispatch) => {
+        try {
+            setLoader(true);
+            const { data } = await api.post("/auth/forgot-password", sendData);
+            if (reset) reset();
+            toast.success(data?.message || "Password updated successfully!");
+            if (navigate) navigate("/login");
+        } catch (error) {
+            console.log(error);
+            toast.error(error?.response?.data?.message || "Failed to reset password");
+        } finally {
+            setLoader(false);
+        }
+};
+
 export const logOutUser = (navigate) => (dispatch) => {
     dispatch({ type:"LOG_OUT" });
     localStorage.removeItem("auth");
