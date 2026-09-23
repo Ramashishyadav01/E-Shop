@@ -138,7 +138,10 @@ export const authenticateSignInUser
             navigate("/");
         } catch (error) {
             console.log(error);
-            toast.error(error?.response?.data?.message || "Internal Server Error");
+            const message = error?.response?.data?.message 
+                || (error?.message === "Network Error" ? "Unable to connect to backend server. Check backend deployment URL." : error?.message)
+                || "Internal Server Error";
+            toast.error(message);
         } finally {
             setLoader(false);
         }
@@ -154,7 +157,11 @@ export const registerNewUser
             navigate("/login");
         } catch (error) {
             console.log(error);
-            toast.error(error?.response?.data?.message || error?.response?.data?.password || "Internal Server Error");
+            const message = error?.response?.data?.message 
+                || error?.response?.data?.password 
+                || (error?.message === "Network Error" ? "Unable to connect to backend server. Check backend deployment URL." : error?.message)
+                || "Internal Server Error";
+            toast.error(message);
         } finally {
             setLoader(false);
         }
@@ -170,7 +177,8 @@ export const resetUserPassword
             if (navigate) navigate("/login");
         } catch (error) {
             console.log(error);
-            toast.error(error?.response?.data?.message || "Failed to reset password");
+            const message = error?.response?.data?.message || error?.message || "Failed to reset password";
+            toast.error(message);
         } finally {
             setLoader(false);
         }

@@ -2,10 +2,14 @@
 
 import axios from 'axios';
 
-console.log("MY BACKEND URL IS:", import.meta.env.VITE_BACK_END_URL);
+const rawBackendUrl = import.meta.env.VITE_BACK_END_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+const cleanBackendUrl = rawBackendUrl.replace(/\/+$/, '');
+const baseURL = cleanBackendUrl.endsWith('/api') ? cleanBackendUrl : `${cleanBackendUrl}/api`;
+
+console.log("MY BACKEND URL IS:", baseURL);
 
 const api = axios.create({
-    baseURL: `${import.meta.env.VITE_BACK_END_URL}/api`,
+    baseURL,
     withCredentials: true,
     headers: {
         'Content-Type': 'application/json',

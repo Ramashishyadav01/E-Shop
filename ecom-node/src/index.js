@@ -36,16 +36,26 @@ const allowedOrigins = [
   'http://localhost:5174',
   'http://127.0.0.1:5174',
 ];
-if (process.env.FRONTEND_URL && !allowedOrigins.includes(process.env.FRONTEND_URL)) {
-  allowedOrigins.push(process.env.FRONTEND_URL);
+if (process.env.FRONTEND_URL) {
+  const cleanFrontendUrl = process.env.FRONTEND_URL.replace(/\/+$/, '');
+  if (!allowedOrigins.includes(cleanFrontendUrl)) {
+    allowedOrigins.push(cleanFrontendUrl);
+  }
 }
 
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin) || /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+    if (!origin) return callback(null, true);
+    
+    const cleanOrigin = origin.replace(/\/+$/, '');
+    const isLocalhost = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(cleanOrigin);
+    const isVercel = /\.vercel\.app$/.test(cleanOrigin);
+    const isAllowed = allowedOrigins.includes(cleanOrigin);
+
+    if (isLocalhost || isVercel || isAllowed) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      callback(new Error(`Not allowed by CORS: ${origin}`));
     }
   },
   credentials: true,

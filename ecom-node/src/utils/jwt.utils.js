@@ -10,12 +10,13 @@ const generateToken = (username) => {
 
 const generateJwtCookie = (username) => {
   const token = generateToken(username);
+  const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER === 'true';
   return {
     token,
     cookieOptions: {
       httpOnly: false,
-      secure: false,
-      sameSite: 'lax',
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
       maxAge: 24 * 60 * 60 * 1000,
       path: '/',
     },

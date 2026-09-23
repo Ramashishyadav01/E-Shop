@@ -8,7 +8,10 @@ const { constructImageUrl } = require('../utils/file.utils');
 // POST /api/auth/signin
 const signin = async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { username, password } = req.body || {};
+    if (!username || !password) {
+      return res.status(400).json({ message: 'Username and password are required', status: false });
+    }
     
     // Find user
     const user = await User.findOne({ userName: username });
@@ -35,8 +38,8 @@ const signin = async (req, res) => {
       avatarUrl: user.avatar ? constructImageUrl(user.avatar) : null
     });
   } catch (err) {
-    console.error("🚨 SIGNIN ERROR:", err); // This will print the exact error in your terminal
-    return res.status(500).json({ message: "Internal Server Error during signin" });
+    console.error("🚨 SIGNIN ERROR:", err);
+    return res.status(500).json({ message: err.message || "Internal Server Error during signin" });
   }
 };
 
