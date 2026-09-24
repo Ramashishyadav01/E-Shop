@@ -70,6 +70,15 @@ app.use(cookieParser());
 const imagePath = path.join(process.cwd(), 'images');
 app.use('/images', express.static(imagePath));
 
+// Root route
+app.get('/', (req, res) => {
+  res.status(200).json({
+    status: true,
+    message: 'E-Shop Backend API is up and running!',
+    documentation: '/api-docs'
+  });
+});
+
 // Swagger docs
 swaggerSetup(app);
 
