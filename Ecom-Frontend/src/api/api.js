@@ -2,7 +2,7 @@
 
 import axios from 'axios';
 
-const rawBackendUrl = import.meta.env.VITE_BACK_END_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+const rawBackendUrl = import.meta.env.VITE_BACK_END_URL || import.meta.env.VITE_API_BASE_URL || 'https://e-shop-4fgk.onrender.com';
 const cleanBackendUrl = rawBackendUrl.replace(/\/+$/, '');
 const baseURL = cleanBackendUrl.endsWith('/api') ? cleanBackendUrl : `${cleanBackendUrl}/api`;
 

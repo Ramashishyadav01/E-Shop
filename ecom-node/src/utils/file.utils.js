@@ -35,7 +35,7 @@ const upload = multer({
 });
 
 const constructImageUrl = (imageName) => {
-  const base = process.env.IMAGE_BASE_URL || 'http://localhost:8080/images';
+  const base = process.env.IMAGE_BASE_URL || 'https://e-shop-4fgk.onrender.com/images';
   return base.endsWith('/') ? `${base}${imageName}` : `${base}/${imageName}`;
 };
 
