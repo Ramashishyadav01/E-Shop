@@ -7,7 +7,7 @@ import { useDispatch } from "react-redux";
 import { addToCart } from "../../store/actions";
 import toast from "react-hot-toast";
 
-import { getImageUrl } from "../../utils/getImageUrl";
+import { getImageUrl, NO_IMAGE_PLACEHOLDER } from "../../utils/getImageUrl";
 
 const ProductCard = ({
     productId,
@@ -62,7 +62,7 @@ const ProductCard = ({
                 alt={productName}
                 onError={(e) => {
                     e.target.onerror = null;
-                    e.target.src = "https://via.placeholder.com/300x300?text=No+Image";
+                    e.target.src = NO_IMAGE_PLACEHOLDER;
                 }}>
                 </img>
             </div>

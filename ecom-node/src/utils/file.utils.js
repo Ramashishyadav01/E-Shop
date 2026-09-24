@@ -35,8 +35,13 @@ const upload = multer({
 });
 
 const constructImageUrl = (imageName) => {
+  if (!imageName) return null;
+  if (typeof imageName === 'string' && (imageName.startsWith('data:') || imageName.startsWith('http://') || imageName.startsWith('https://'))) {
+    return imageName;
+  }
   const base = process.env.IMAGE_BASE_URL || 'https://e-shop-4fgk.onrender.com/images';
-  return base.endsWith('/') ? `${base}${imageName}` : `${base}/${imageName}`;
+  const cleanImg = String(imageName).replace(/^\/+/, '');
+  return base.endsWith('/') ? `${base}${cleanImg}` : `${base}/${cleanImg}`;
 };
 
 module.exports = { upload, constructImageUrl };

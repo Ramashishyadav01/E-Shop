@@ -1,6 +1,6 @@
 import { FaEdit, FaEye, FaImage, FaTrashAlt } from "react-icons/fa";
 import { MdOutlineEmail } from "react-icons/md";
-import { getImageUrl } from "../../utils/getImageUrl";
+import { getImageUrl, NO_IMAGE_PLACEHOLDER_SM } from "../../utils/getImageUrl";
 
 export const adminProductTableColumn = (
   handleEdit,
@@ -109,7 +109,7 @@ export const adminProductTableColumn = (
             className="w-10 h-10 object-contain rounded border border-gray-200 shadow-sm"
             onError={(e) => {
               e.target.onerror = null;
-              e.target.src = "https://via.placeholder.com/40?text=No+Img";
+              e.target.src = NO_IMAGE_PLACEHOLDER_SM;
             }}
           />
         </div>

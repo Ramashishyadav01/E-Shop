@@ -3,6 +3,7 @@ const User = require('../models/user.model');
 const { generateJwtCookie } = require('../utils/jwt.utils');
 const { paginate, buildPageResponse } = require('../utils/pagination.utils');
 const { ROLES } = require('../config/constants');
+const fs = require('fs');
 const { constructImageUrl } = require('../utils/file.utils');
 
 // POST /api/auth/signin
@@ -43,8 +44,7 @@ const signin = async (req, res) => {
   }
 };
 
-// POST /api/auth/upload-profile-picture (or similar route)
-// MOVED OUTSIDE OF SIGNIN
+// POST /api/auth/upload-profile-picture
 const uploadProfilePicture = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
@@ -52,8 +52,16 @@ const uploadProfilePicture = async (req, res) => {
     
     if (!req.file) return res.status(400).json({ message: 'No image file provided', status: false });
 
-    // Save the new filename to the user's document
-    user.avatar = req.file.filename;
+    // Save as persistent Base64 Data URI in MongoDB so it survives Render restarts
+    if (req.file.buffer) {
+      user.avatar = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+    } else if (req.file.path && fs.existsSync(req.file.path)) {
+      const fileBuffer = fs.readFileSync(req.file.path);
+      user.avatar = `data:${req.file.mimetype};base64,${fileBuffer.toString('base64')}`;
+    } else {
+      user.avatar = req.file.filename;
+    }
+
     await user.save();
 
     return res.status(200).json({ 

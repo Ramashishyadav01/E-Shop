@@ -2,6 +2,7 @@ const Product = require('../models/product.model');
 const Category = require('../models/category.model');
 const Cart = require('../models/cart.model');
 const { paginate, buildPageResponse } = require('../utils/pagination.utils');
+const fs = require('fs');
 const { upload, constructImageUrl } = require('../utils/file.utils');
 
 const formatProduct = (p) => ({
@@ -136,7 +137,16 @@ const updateProductImage = async (req, res) => {
     if (!product) return res.status(404).json({ message: 'Product not found', status: false });
     if (!req.file) return res.status(400).json({ message: 'No image file provided', status: false });
 
-    product.image = req.file.filename;
+    // Store image as persistent Base64 Data URI in MongoDB so it survives Render server restarts
+    if (req.file.buffer) {
+      product.image = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+    } else if (req.file.path && fs.existsSync(req.file.path)) {
+      const fileBuffer = fs.readFileSync(req.file.path);
+      product.image = `data:${req.file.mimetype};base64,${fileBuffer.toString('base64')}`;
+    } else {
+      product.image = req.file.filename;
+    }
+
     await product.save();
     return res.status(200).json(formatProduct(product));
   } catch (err) {
