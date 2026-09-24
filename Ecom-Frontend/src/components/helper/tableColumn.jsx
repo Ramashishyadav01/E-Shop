@@ -1,5 +1,6 @@
 import { FaEdit, FaEye, FaImage, FaTrashAlt } from "react-icons/fa";
 import { MdOutlineEmail } from "react-icons/md";
+import { getImageUrl } from "../../utils/getImageUrl";
 
 export const adminProductTableColumn = (
   handleEdit,
@@ -98,28 +99,19 @@ export const adminProductTableColumn = (
     cellClassName: "text-slate-700 font-normal border",
     renderHeader: (params) => <span className="text-center">Image</span>,
     renderCell: (params) => {
-      const imgUrl = params.value;
-      const fullUrl = imgUrl?.startsWith("http")
-        ? imgUrl
-        : imgUrl
-        ? `https://e-shop-4fgk.onrender.com/images/${imgUrl}`
-        : null;
+      const fullUrl = getImageUrl(params.value);
 
       return (
         <div className="flex items-center justify-center h-full w-full py-1">
-          {fullUrl ? (
-            <img
-              src={fullUrl}
-              alt={params.row.productName || "Product"}
-              className="w-10 h-10 object-contain rounded border border-gray-200 shadow-sm"
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.style.display = "none";
-              }}
-            />
-          ) : (
-            <span className="text-xs text-gray-400">No Image</span>
-          )}
+          <img
+            src={fullUrl}
+            alt={params.row.productName || "Product"}
+            className="w-10 h-10 object-contain rounded border border-gray-200 shadow-sm"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = "https://via.placeholder.com/40?text=No+Img";
+            }}
+          />
         </div>
       );
     },

@@ -4,6 +4,8 @@ import { useState } from 'react'
 import Status from './Status';
 import { MdClose, MdDone } from 'react-icons/md';
 
+import { getImageUrl } from '../../utils/getImageUrl';
+
 function ProductViewModal({open, setOpen, product, isAvailable}) {
   
   const {id, productName, image, description, quantity, price, discount, specialPrice} = product;
@@ -28,7 +30,7 @@ function ProductViewModal({open, setOpen, product, isAvailable}) {
                 {image && (
                     <div className='flex justify-center aspect-3/2'>
                     <img 
-                    src={image}
+                    src={getImageUrl(image)}
                     alt={productName} />
                     </div>
                 )}

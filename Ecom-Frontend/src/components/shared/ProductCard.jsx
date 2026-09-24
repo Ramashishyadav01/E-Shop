@@ -7,6 +7,8 @@ import { useDispatch } from "react-redux";
 import { addToCart } from "../../store/actions";
 import toast from "react-hot-toast";
 
+import { getImageUrl } from "../../utils/getImageUrl";
+
 const ProductCard = ({
     productId,
     productName,
@@ -56,8 +58,12 @@ const ProductCard = ({
                 
                 <img 
                 className="h-full w-auto object-contain cursor-pointer transition-transform duration-500 transform group-hover:scale-110"
-                src={image}
-                alt={productName}>
+                src={getImageUrl(image)}
+                alt={productName}
+                onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = "https://via.placeholder.com/300x300?text=No+Image";
+                }}>
                 </img>
             </div>
 
