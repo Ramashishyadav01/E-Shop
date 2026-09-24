@@ -47,23 +47,29 @@ const OrderSummary = ({ totalPrice, cart, address, paymentMethod}) => {
         <div className='pb-4 border rounded-lg shadow-xs mb-6'>
             <h2 className='text-2xl font-semibold mb-2'>Order Items</h2>
             <div className='space-y-2'>
-                {cart?.map((item) => (
-                    <div key={item?.productId} className='flex items-center'>
-                        <img src={`${import.meta.env.VITE_BACK_END_URL}/images/${
-                            item?.image
-                        }`}
-                        alt='Product'
-                        className='w-12 h-12 rounded-sm'></img>
-                    <div className='text-gray-500'>
-                        <p>{item?.productName}</p>
-                        <p>
-                {item?.quantity} x ₹{item?.specialPrice} = ₹{
-                    formatPriceCalculation(item?.quantity, item?.specialPrice)
-                }
-                        </p>
-                    </div>
-                    </div>
-                ))}
+                {cart?.map((item) => {
+                    const imgUrl = item?.image;
+                    const fullUrl = imgUrl?.startsWith("http")
+                        ? imgUrl
+                        : imgUrl
+                        ? `https://e-shop-4fgk.onrender.com/images/${imgUrl}`
+                        : "";
+                    return (
+                        <div key={item?.productId} className='flex items-center gap-3'>
+                            <img src={fullUrl}
+                            alt='Product'
+                            className='w-12 h-12 rounded-sm object-contain border' />
+                            <div className='text-gray-500'>
+                                <p>{item?.productName}</p>
+                                <p>
+                                    {item?.quantity} x ₹{item?.specialPrice} = ₹{
+                                        formatPriceCalculation(item?.quantity, item?.specialPrice)
+                                    }
+                                </p>
+                            </div>
+                        </div>
+                    );
+                })}
             </div>
         </div>
        </div>

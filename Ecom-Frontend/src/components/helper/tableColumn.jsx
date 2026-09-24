@@ -75,7 +75,7 @@ export const adminProductTableColumn = (
   {
     sortable: false,
     field: "description",
-    headerName: "Image",
+    headerName: "Description",
     headerAlign: "center",
     align: "center",
     width: 200,
@@ -83,7 +83,7 @@ export const adminProductTableColumn = (
     disableColumnMenu: true,
     headerClassName: "text-black font-semibold border ",
     cellClassName: "text-slate-700 font-normal border",
-    renderHeader: (params) => <span className="ps-10">Description</span>,
+    renderHeader: (params) => <span className="text-center">Description</span>,
   },
   {
     sortable: false,
@@ -91,12 +91,38 @@ export const adminProductTableColumn = (
     headerName: "Image",
     headerAlign: "center",
     align: "center",
-    width: 200,
+    width: 120,
     editable: false,
     disableColumnMenu: true,
     headerClassName: "text-black font-semibold border ",
     cellClassName: "text-slate-700 font-normal border",
-    renderHeader: (params) => <span className="ps-10">Image</span>,
+    renderHeader: (params) => <span className="text-center">Image</span>,
+    renderCell: (params) => {
+      const imgUrl = params.value;
+      const fullUrl = imgUrl?.startsWith("http")
+        ? imgUrl
+        : imgUrl
+        ? `https://e-shop-4fgk.onrender.com/images/${imgUrl}`
+        : null;
+
+      return (
+        <div className="flex items-center justify-center h-full w-full py-1">
+          {fullUrl ? (
+            <img
+              src={fullUrl}
+              alt={params.row.productName || "Product"}
+              className="w-10 h-10 object-contain rounded border border-gray-200 shadow-sm"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.style.display = "none";
+              }}
+            />
+          ) : (
+            <span className="text-xs text-gray-400">No Image</span>
+          )}
+        </div>
+      );
+    },
   },
 
   {
