@@ -97,9 +97,15 @@ const placeOrder = async (req, res) => {
       payment: { paymentMethod, pgPaymentId, pgStatus, pgResponse: pgResponseMessage, pgName },
     });
 
-    // Update product stock and clear cart
-    for (const item of cart.cartItems) {
-      await Product.findByIdAndUpdate(item.product._id, { $inc: { quantity: -item.quantity } });
+    // Batch update product stock in a single DB operation
+    const bulkOps = cart.cartItems.map(item => ({
+      updateOne: {
+        filter: { _id: item.product._id },
+        update: { $inc: { quantity: -item.quantity } },
+      },
+    }));
+    if (bulkOps.length > 0) {
+      await Product.bulkWrite(bulkOps);
     }
     cart.cartItems = [];
     cart.totalPrice = 0;
@@ -131,17 +137,29 @@ const getAllOrders = async (req, res) => {
 const getAllSellerOrders = async (req, res) => {
   try {
     const { pageNumber = 0, pageSize = 50, sortBy = 'totalAmount', sortOrder = 'asc' } = req.query;
-    const { skip, limit, sort } = paginate(pageNumber, pageSize, sortBy, sortOrder);
-    const sellerId = req.user._id.toString();
+    const sellerId = req.user._id;
+    const skip = parseInt(pageNumber) * parseInt(pageSize);
+    const limit = parseInt(pageSize);
+    const sortDir = sortOrder === 'asc' ? 1 : -1;
 
-    const allOrders = await Order.find().sort(sort).populate('orderItems.product address');
-    const total = await Order.countDocuments();
+    // Find products belonging to this seller using the indexed user field
+    const sellerProducts = await Product.find({ user: sellerId }, '_id').lean();
+    const sellerProductIds = sellerProducts.map(p => p._id);
 
-    const sellerOrders = allOrders.filter(order =>
-      order.orderItems.some(item => item.product?.user?.toString() === sellerId)
-    );
-    const paginated = sellerOrders.slice(parseInt(skip), parseInt(skip) + parseInt(limit));
-    return res.status(200).json(buildPageResponse(paginated.map(formatOrder), sellerOrders.length, pageNumber, pageSize));
+    // Query only orders that contain seller's products using the index
+    const query = { 'orderItems.product': { $in: sellerProductIds } };
+
+    const [orders, total] = await Promise.all([
+      Order.find(query)
+        .sort({ [sortBy]: sortDir })
+        .skip(skip)
+        .limit(limit)
+        .populate('orderItems.product address')
+        .lean(),
+      Order.countDocuments(query),
+    ]);
+
+    return res.status(200).json(buildPageResponse(orders.map(formatOrder), total, pageNumber, pageSize));
   } catch (err) {
     return res.status(500).json({ message: err.message });
   }

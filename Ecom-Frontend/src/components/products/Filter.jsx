@@ -25,18 +25,20 @@ const Filter = ({ categories }) => {
 
     useEffect(() => { 
         const handler = setTimeout(() => {
+            const newParams = new URLSearchParams(searchParams);
             if (searchTerm) {
-                searchParams.set("keyword", searchTerm);
+                newParams.set("keyword", searchTerm);
             } else {
-                searchParams.delete("keyword");
+                newParams.delete("keyword");
             }
-            navigate(`${pathname}?${searchParams.toString()}`);
+            navigate(`${pathname}?${newParams.toString()}`);
         }, 700);
 
         return () => {
             clearTimeout(handler);
         };
-    }, [searchParams, searchTerm, navigate, pathname]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [searchTerm]);
 
     const handleCategoryChange = (event) => {
         const selectedCategory = event.target.value;

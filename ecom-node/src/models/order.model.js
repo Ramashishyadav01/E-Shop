@@ -29,4 +29,10 @@ const orderSchema = new mongoose.Schema({
   payment: paymentSchema,
 }, { timestamps: true });
 
+// Performance indexes
+orderSchema.index({ email: 1 });
+orderSchema.index({ orderStatus: 1 });
+orderSchema.index({ createdAt: -1 });
+orderSchema.index({ 'orderItems.product': 1 });
+
 module.exports = mongoose.model('Order', orderSchema);

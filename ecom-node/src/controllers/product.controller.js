@@ -40,7 +40,7 @@ const addProduct = async (req, res) => {
 // GET /api/public/products
 const getAllProducts = async (req, res) => {
   try {
-    const { pageNumber = 0, pageSize = 50, SortBy = '_id', sortOrder = 'asc' } = req.query;
+    const { pageNumber = 0, pageSize = 12, SortBy = '_id', sortOrder = 'asc' } = req.query;
     const { skip, limit, sort } = paginate(pageNumber, pageSize, SortBy, sortOrder);
     const [products, total] = await Promise.all([
       Product.find().sort(sort).skip(skip).limit(limit).populate('category'),
@@ -58,7 +58,7 @@ const getProductsByCategory = async (req, res) => {
   try {
     const category = await Category.findById(req.params.categoryId);
     if (!category) return res.status(404).json({ message: 'Category not found', status: false });
-    const { pageNumber = 0, pageSize = 50, SortBy = 'price', sortOrder = 'asc' } = req.query;
+    const { pageNumber = 0, pageSize = 12, SortBy = 'price', sortOrder = 'asc' } = req.query;
     const { skip, limit, sort } = paginate(pageNumber, pageSize, SortBy, sortOrder);
     const [products, total] = await Promise.all([
       Product.find({ category: category._id }).sort(sort).skip(skip).limit(limit),
@@ -75,7 +75,7 @@ const getProductsByCategory = async (req, res) => {
 const getProductsByKeyword = async (req, res) => {
   try {
     const keyword = req.params.Keyword;
-    const { pageNumber = 0, pageSize = 50, SortBy = '_id', sortOrder = 'asc' } = req.query;
+    const { pageNumber = 0, pageSize = 12, SortBy = '_id', sortOrder = 'asc' } = req.query;
     const { skip, limit, sort } = paginate(pageNumber, pageSize, SortBy, sortOrder);
     const query = { productName: { $regex: keyword, $options: 'i' } };
     const [products, total] = await Promise.all([

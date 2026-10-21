@@ -1,4 +1,3 @@
-
 import { useDispatch, useSelector } from "react-redux";
 import HeroBanner from "./HeroBanner";
 import { useEffect } from "react";
@@ -14,7 +13,8 @@ const Home = () => {
         (state) => state.errors
     );
     useEffect(() => {
-        dispatch(fetchProducts());
+        // Only fetch 12 featured products for the home page
+        dispatch(fetchProducts("pageSize=12"));
     }, [dispatch]);
     return (
         <div className="lg:px-14 sm:px-8 px-4">
@@ -45,7 +45,7 @@ const Home = () => {
                     <div className="pb-6 pt-14 grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 gap-6">
                         {products && 
                         products
-                                .map((item, i) => <ProductCard key={i} {...item} />
+                                .map((item) => <ProductCard key={item.productId} {...item} />
                         )}
                     </div>
                 )}

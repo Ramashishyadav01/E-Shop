@@ -2,7 +2,14 @@ const mongoose = require('mongoose');
 
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/ecommerce');
+    const conn = await mongoose.connect(
+      process.env.MONGO_URI || 'mongodb://localhost:27017/ecommerce',
+      {
+        maxPoolSize: 10,
+        serverSelectionTimeoutMS: 5000,
+        socketTimeoutMS: 45000,
+      }
+    );
     console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
     console.error(`MongoDB connection error: ${error.message}`);
@@ -11,23 +18,3 @@ const connectDB = async () => {
 };
 
 module.exports = connectDB;
-
-
-// const mongoose = require('mongoose');
-
-// const connectDB = async () => {
-//   try {
-//     if (!process.env.MONGO_URI) {
-//       throw new Error('MONGO_URI is not defined');
-//     }
-
-//     const conn = await mongoose.connect(process.env.MONGO_URI);
-
-//     console.log(`MongoDB Connected: ${conn.connection.host}`);
-//   } catch (error) {
-//     console.error(`MongoDB connection error: ${error.message}`);
-//     process.exit(1);
-//   }
-// };
-
-// module.exports = connectDB;

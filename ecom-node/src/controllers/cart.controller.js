@@ -62,9 +62,14 @@ const createOrUpdateCart = async (req, res) => {
       cart.totalPrice = 0;
     }
 
+    // Batch fetch all products in a single query (eliminates N+1 queries)
+    const productIds = cartItems.map(item => item.productId);
+    const products = await Product.find({ _id: { $in: productIds } }).lean();
+    const productMap = new Map(products.map(p => [p._id.toString(), p]));
+
     let total = 0;
     for (const item of cartItems) {
-      const product = await Product.findById(item.productId);
+      const product = productMap.get(item.productId.toString());
       if (!product) return res.status(404).json({ message: `Product not found: ${item.productId}`, status: false });
       total += product.specialPrice * item.quantity;
       cart.cartItems.push({ product: product._id, quantity: item.quantity, discount: product.discount, productPrice: product.specialPrice });
