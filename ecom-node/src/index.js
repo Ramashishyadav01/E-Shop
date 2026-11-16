@@ -1,4 +1,3 @@
-
 const dotenv = require('dotenv');
 dotenv.config();
 
@@ -7,6 +6,7 @@ const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const path = require('path');
+const compression = require('compression');
 
 // 3. Load Configs
 const connectDB = require('./config/db');
@@ -43,6 +43,9 @@ if (process.env.FRONTEND_URL) {
   }
 }
 
+// Compress all HTTP responses (reduces base64 JSON payload from 500KB to ~100KB)
+app.use(compression());
+
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin) return callback(null, true);
@@ -62,13 +65,27 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 }));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Static files (images)
+// Static files (images) with 1-day browser caching
 const imagePath = path.join(process.cwd(), 'images');
-app.use('/images', express.static(imagePath));
+app.use('/images', express.static(imagePath, { maxAge: '1d' }));
+
+// Lightweight ping & health endpoints for zero-overhead wake-up and monitoring
+app.get('/api/ping', (req, res) => {
+  res.status(200).json({ status: 'ok', timestamp: Date.now() });
+});
+
+app.get('/api/health', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    uptime: Math.floor(process.uptime()),
+    timestamp: new Date().toISOString()
+  });
+});
 
 // Root route
 app.get('/', (req, res) => {
@@ -105,6 +122,21 @@ app.listen(PORT, () => {
   console.log(`Swagger UI: http://localhost:${PORT}/api-docs`);
 });
 
+// Render Free Tier Keep-Alive Self-Ping
+// Automatically pings the server every 14 minutes to prevent idle spin-down
+if (process.env.NODE_ENV === 'production' || process.env.RENDER) {
+  const BACKEND_URL = process.env.BACKEND_URL || 'https://e-shop-4fgk.onrender.com';
+  const PING_INTERVAL = 14 * 60 * 1000; // 14 minutes
+  setInterval(async () => {
+    try {
+      if (typeof fetch === 'function') {
+        const pingRes = await fetch(`${BACKEND_URL}/api/ping`);
+        console.log(`[Keep-Alive Ping] Status: ${pingRes.status} at ${new Date().toISOString()}`);
+      }
+    } catch (err) {
+      console.warn(`[Keep-Alive Ping] Warning: ${err.message}`);
+    }
+  }, PING_INTERVAL);
+}
+
 module.exports = app;
-
-

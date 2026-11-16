@@ -3,9 +3,15 @@ import api from "../../api/api"
 
 import toast from 'react-hot-toast';
 
-export const fetchProducts = (queryString = "") => async (dispatch) => {
+export const fetchProducts = (queryString = "") => async (dispatch, getState) => {
     try {
-        dispatch({ type: "IS_FETCHING" });
+        const currentProducts = getState()?.products?.products;
+        // If we already have products (e.g. from session cache), keep displaying them
+        if (currentProducts && currentProducts.length > 0) {
+            dispatch({ type: "IS_BACKGROUND_FETCHING" });
+        } else {
+            dispatch({ type: "IS_FETCHING" });
+        }
 
         // 1. Parse the query string to check for category or keyword
         const params = new URLSearchParams(queryString);
@@ -26,6 +32,22 @@ export const fetchProducts = (queryString = "") => async (dispatch) => {
         // 3. Fetch data from the correct endpoint
         const { data } = await api.get(`${endpoint}?${queryString}`);
         
+        // Cache home page/default products for instant reload
+        if (!queryString || queryString === "pageSize=12") {
+            try {
+                sessionStorage.setItem("cached_products", JSON.stringify(data.content));
+                sessionStorage.setItem("cached_pagination", JSON.stringify({
+                    pageNumber: data.pageNumber,
+                    pageSize: data.pageSize,
+                    totalElements: data.totalElements,
+                    totalPages: data.totalPages,
+                    lastPage: data.lastPage,
+                }));
+            } catch (e) {
+                // Ignore storage limits
+            }
+        }
+
         dispatch({
             type: "FETCH_PRODUCTS",
             payload: data.content,
@@ -38,17 +60,30 @@ export const fetchProducts = (queryString = "") => async (dispatch) => {
         dispatch({ type: "IS_SUCCESS" });
     } catch (error) {
         console.log(error);
-        dispatch({ 
-            type: "IS_ERROR",
-            payload: error?.response?.data?.message || "Failed to fetch products",
-         });
+        const currentProducts = getState()?.products?.products;
+        if (!currentProducts || currentProducts.length === 0) {
+            dispatch({ 
+                type: "IS_ERROR",
+                payload: error?.response?.data?.message || "Failed to fetch products",
+            });
+        } else {
+            dispatch({ type: "IS_SUCCESS" });
+        }
     }
 };
 
-export const fetchCategories = (queryString = "") => async (dispatch) => {
+export const fetchCategories = (queryString = "") => async (dispatch, getState) => {
     try {
-        dispatch({ type: "CATEGORY_LOADER" });
+        const currentCategories = getState()?.products?.categories;
+        if (!currentCategories || currentCategories.length === 0) {
+            dispatch({ type: "CATEGORY_LOADER" });
+        }
         const { data } = await api.get(`/public/categories?${queryString}`);
+        if (!queryString) {
+            try {
+                sessionStorage.setItem("cached_categories", JSON.stringify(data.content));
+            } catch (e) {}
+        }
         dispatch({
             type: "FETCH_CATEGORIES",
             payload: data.content,
@@ -61,10 +96,13 @@ export const fetchCategories = (queryString = "") => async (dispatch) => {
         dispatch({ type: "CATEGORY_SUCCESS" });
     } catch (error) {
         console.log(error);
-        dispatch({ 
-            type: "IS_ERROR",
-            payload: error?.response?.data?.message || "Failed to fetch categories",
-         });
+        const currentCategories = getState()?.products?.categories;
+        if (!currentCategories || currentCategories.length === 0) {
+            dispatch({ 
+                type: "IS_ERROR",
+                payload: error?.response?.data?.message || "Failed to fetch categories",
+            });
+        }
     }
 };
 

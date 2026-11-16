@@ -4,6 +4,7 @@ const Cart = require('../models/cart.model');
 const { paginate, buildPageResponse } = require('../utils/pagination.utils');
 const fs = require('fs');
 const { upload, constructImageUrl } = require('../utils/file.utils');
+const { getCache, setCache, clearCachePrefix } = require('../utils/cache.utils');
 
 const formatProduct = (p) => ({
   productId: p._id,
@@ -31,6 +32,7 @@ const addProduct = async (req, res) => {
       user: req.user ? req.user._id : undefined,
     });
     await product.save();
+    clearCachePrefix('products_');
     return res.status(201).json(formatProduct(product));
   } catch (err) {
     return res.status(500).json({ message: err.message });
@@ -41,13 +43,28 @@ const addProduct = async (req, res) => {
 const getAllProducts = async (req, res) => {
   try {
     const { pageNumber = 0, pageSize = 12, SortBy = '_id', sortOrder = 'asc' } = req.query;
+    const cacheKey = `products_all_${pageNumber}_${pageSize}_${SortBy}_${sortOrder}`;
+    const cached = getCache(cacheKey);
+
+    if (cached) {
+      res.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
+      res.set('X-Cache', 'HIT');
+      return res.status(200).json(cached);
+    }
+
     const { skip, limit, sort } = paginate(pageNumber, pageSize, SortBy, sortOrder);
     const [products, total] = await Promise.all([
       Product.find().sort(sort).skip(skip).limit(limit).populate('category'),
       Product.countDocuments(),
     ]);
+
     if (!products.length) return res.status(400).json({ message: 'Product not present', status: false });
-    return res.status(200).json(buildPageResponse(products.map(formatProduct), total, pageNumber, pageSize));
+
+    const response = buildPageResponse(products.map(formatProduct), total, pageNumber, pageSize);
+    setCache(cacheKey, response, 300); // 5 min TTL
+    res.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
+    res.set('X-Cache', 'MISS');
+    return res.status(200).json(response);
   } catch (err) {
     return res.status(500).json({ message: err.message });
   }
@@ -59,13 +76,27 @@ const getProductsByCategory = async (req, res) => {
     const category = await Category.findById(req.params.categoryId);
     if (!category) return res.status(404).json({ message: 'Category not found', status: false });
     const { pageNumber = 0, pageSize = 12, SortBy = 'price', sortOrder = 'asc' } = req.query;
+
+    const cacheKey = `products_cat_${req.params.categoryId}_${pageNumber}_${pageSize}_${SortBy}_${sortOrder}`;
+    const cached = getCache(cacheKey);
+    if (cached) {
+      res.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
+      res.set('X-Cache', 'HIT');
+      return res.status(200).json(cached);
+    }
+
     const { skip, limit, sort } = paginate(pageNumber, pageSize, SortBy, sortOrder);
     const [products, total] = await Promise.all([
       Product.find({ category: category._id }).sort(sort).skip(skip).limit(limit),
       Product.countDocuments({ category: category._id }),
     ]);
     if (!products.length) return res.status(400).json({ message: `${category.categoryName} - Product not found`, status: false });
-    return res.status(200).json(buildPageResponse(products.map(formatProduct), total, pageNumber, pageSize));
+
+    const response = buildPageResponse(products.map(formatProduct), total, pageNumber, pageSize);
+    setCache(cacheKey, response, 300);
+    res.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
+    res.set('X-Cache', 'MISS');
+    return res.status(200).json(response);
   } catch (err) {
     return res.status(500).json({ message: err.message });
   }
@@ -76,6 +107,15 @@ const getProductsByKeyword = async (req, res) => {
   try {
     const keyword = req.params.Keyword;
     const { pageNumber = 0, pageSize = 12, SortBy = '_id', sortOrder = 'asc' } = req.query;
+
+    const cacheKey = `products_kw_${keyword}_${pageNumber}_${pageSize}_${SortBy}_${sortOrder}`;
+    const cached = getCache(cacheKey);
+    if (cached) {
+      res.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
+      res.set('X-Cache', 'HIT');
+      return res.status(200).json(cached);
+    }
+
     const { skip, limit, sort } = paginate(pageNumber, pageSize, SortBy, sortOrder);
     const query = { productName: { $regex: keyword, $options: 'i' } };
     const [products, total] = await Promise.all([
@@ -83,7 +123,12 @@ const getProductsByKeyword = async (req, res) => {
       Product.countDocuments(query),
     ]);
     if (!products.length) return res.status(400).json({ message: `Product not found with keyword: ${keyword}`, status: false });
-    return res.status(200).json(buildPageResponse(products.map(formatProduct), total, pageNumber, pageSize));
+
+    const response = buildPageResponse(products.map(formatProduct), total, pageNumber, pageSize);
+    setCache(cacheKey, response, 300);
+    res.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
+    res.set('X-Cache', 'MISS');
+    return res.status(200).json(response);
   } catch (err) {
     return res.status(500).json({ message: err.message });
   }
@@ -106,6 +151,7 @@ const updateProduct = async (req, res) => {
       { arrayFilters: [{ 'elem.product': product._id }] }
     );
 
+    clearCachePrefix('products_');
     return res.status(200).json(formatProduct(product));
   } catch (err) {
     return res.status(500).json({ message: err.message });
@@ -124,6 +170,7 @@ const deleteProduct = async (req, res) => {
       { $pull: { cartItems: { product: product._id } } }
     );
     await product.deleteOne();
+    clearCachePrefix('products_');
     return res.status(200).json(formatProduct(product));
   } catch (err) {
     return res.status(500).json({ message: err.message });
@@ -148,6 +195,7 @@ const updateProductImage = async (req, res) => {
     }
 
     await product.save();
+    clearCachePrefix('products_');
     return res.status(200).json(formatProduct(product));
   } catch (err) {
     return res.status(500).json({ message: err.message });

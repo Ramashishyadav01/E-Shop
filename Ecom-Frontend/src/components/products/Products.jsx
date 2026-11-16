@@ -5,16 +5,16 @@ import { useEffect } from "react";
 import { fetchCategories } from "../../store/actions";
 import Filter from "./Filter";
 import useProductFilter from "../../hooks/useProductFilter";
-import Loader from "../shared/Loader";
+import ProductSkeletonGrid from "../shared/ProductSkeletonGrid";
 import Paginations from "../shared/Paginations";
 
 const Products = () => {
-    const { isLoading, errorMessage } = useSelector(
+    const { isLoading, errorMessage, isBackgroundFetching } = useSelector(
         (state) => state.errors
     );
-    const {products, categories, pagination} = useSelector(
+    const { products, categories, pagination } = useSelector(
         (state) => state.products
-    )
+    );
     const dispatch = useDispatch();
     useProductFilter();
 
@@ -22,12 +22,22 @@ const Products = () => {
         dispatch(fetchCategories());
     }, [dispatch]);
 
+    const hasProducts = products && products.length > 0;
+
     return (
         <div className="lg:px-14 sm:px-8 px-4 py-14 2xl:w-[90%] 2xl:mx-auto">
             <Filter categories={categories ? categories : []}/>
-            {isLoading ? (
-                <Loader />
-            ) : errorMessage ? (
+            
+            {isBackgroundFetching && hasProducts && (
+                <div className="flex items-center justify-end gap-1.5 text-xs text-blue-600 font-medium py-2">
+                    <span className="w-2 h-2 rounded-full bg-blue-600 animate-ping" />
+                    <span>Updating results...</span>
+                </div>
+            )}
+
+            {isLoading && !hasProducts ? (
+                <ProductSkeletonGrid count={8} />
+            ) : errorMessage && !hasProducts ? (
                 <div className="flex justify-center items-center h-[200px]">
                     <FaExclamationTriangle className="text-slate-800 text-3xl mr-2"/>
                     <span className="text-slate-800 text-lg font-medium">
@@ -36,10 +46,10 @@ const Products = () => {
                 </div>
             ) : (
                 <div className="min-h-[700px]">
-                    <div className="pb-6 pt-14 grid 2xl:grid-cols-4 lg:grid-cols-4 sm:grid-cols-2 gap-y-6 gap-x-6">
-                       {products && 
-                        products.map((item) => <ProductCard key={item.productId} {...item} />
-                        )}
+                    <div className="pb-6 pt-10 grid 2xl:grid-cols-4 lg:grid-cols-4 sm:grid-cols-2 gap-y-6 gap-x-6">
+                       {products && products.map((item) => (
+                           <ProductCard key={item.productId} {...item} />
+                       ))}
                     </div>
                     <div className="flex justify-center pt-10">
                         <Paginations 
@@ -49,7 +59,7 @@ const Products = () => {
                 </div>
             )}
         </div>
-    )
-}
+    );
+};
 
 export default Products;

@@ -1,4 +1,3 @@
-import { Badge } from "@mui/material";
 import { useState } from "react";
 import { FaShoppingCart, FaSignInAlt, FaStore } from "react-icons/fa";
 import { IoIosMenu } from "react-icons/io";
@@ -12,18 +11,19 @@ const Navbar = () => {
     const [navbarOpen, setNavbarOpen] = useState(false);
     const { cart } = useSelector((state) => state.carts);
     const { user } = useSelector((state) => state.auth);
+    const cartCount = cart?.length || 0;
     
     return (
-        <div className="h-[70px] bg-custom-gradient text-white z-50 flex items-center sticky top-0">
-            <div className="lg:px-14 sm:px-8 px-4 w-full flex justify-between">
+        <div className="h-[70px] bg-custom-gradient text-white z-50 flex items-center sticky top-0 shadow-sm">
+            <div className="lg:px-14 sm:px-8 px-4 w-full flex justify-between items-center">
                 <Link to="/" className="flex items-center text-2xl font-bold">
                     <FaStore className="mr-2 text-3xl" />
                     <span className="font-[Poppins]">E-Shop</span>
                 </Link>
 
-            <ul className={`flex sm:gap-10 gap-4 sm:items-center  text-slate-800 sm:static absolute left-0 top-[70px] sm:shadow-none shadow-md ${
+            <ul className={`flex sm:gap-10 gap-4 sm:items-center text-slate-800 sm:static absolute left-0 top-[70px] sm:shadow-none shadow-md ${
             navbarOpen ? "h-fit sm:pb-0 pb-5" : "h-0 overflow-hidden"
-          }  transition-all duration-100 sm:h-fit sm:bg-none bg-custom-gradient   text-white sm:w-fit w-full sm:flex-row flex-col px-4 sm:px-0`}>
+          } transition-all duration-100 sm:h-fit sm:bg-none bg-custom-gradient text-white sm:w-fit w-full sm:flex-row flex-col px-4 sm:px-0`}>
                 <li className="font-medium transition-all duration-150">
                    <Link className={`${
                     path === "/" ? "text-white font-semibold" : "text-gray-200"
@@ -41,7 +41,6 @@ const Navbar = () => {
                         Products
                    </Link> 
                 </li>
-
 
                 <li className="font-medium transition-all duration-150">
                    <Link className={`${
@@ -66,14 +65,12 @@ const Navbar = () => {
                     path === "/cart" ? "text-white font-semibold" : "text-gray-200"
                    }`}
                     to="/cart">
-                        <Badge
-                            showZero
-                            badgeContent={cart?.length || 0}
-                            color="primary"
-                            overlap="circular"
-                            anchorOrigin={{ vertical: 'top', horizontal: 'right', }}>
-                                <FaShoppingCart size={25} />
-                        </Badge>
+                        <div className="relative inline-flex items-center cursor-pointer">
+                            <FaShoppingCart size={24} />
+                            <span className="absolute -top-2 -right-2.5 bg-blue-600 text-white text-[11px] font-bold min-w-5 h-5 px-1 rounded-full flex items-center justify-center border-2 border-white/20">
+                                {cartCount}
+                            </span>
+                        </div>
                    </Link> 
                 </li>
 
@@ -97,6 +94,8 @@ const Navbar = () => {
             </ul>
 
             <button
+                type="button"
+                aria-label="Toggle navigation"
                 onClick={() => setNavbarOpen(!navbarOpen)}
                 className="sm:hidden flex items-center sm:mt-0 mt-2">
                     {navbarOpen ? (

@@ -1,5 +1,6 @@
 const initialState = {
     isLoading: false,
+    isBackgroundFetching: false,
     errorMessage: null,
     categoryLoader: false,
     categoryError: null,
@@ -14,17 +15,24 @@ export const errorReducer = (state = initialState, action) => {
                 isLoading: true,
                 errorMessage: null,
             };
+        case "IS_BACKGROUND_FETCHING":
+            return {
+                ...state,
+                isBackgroundFetching: true,
+                errorMessage: null,
+            };
         case "BUTTON_LOADER":
             return {
-                    ...state,
-                    btnLoader: true,
-                    errorMessage: null,
-                    categoryError: null,
-                };
+                ...state,
+                btnLoader: true,
+                errorMessage: null,
+                categoryError: null,
+            };
         case "IS_SUCCESS":
             return {
                 ...state,
                 isLoading: false,
+                isBackgroundFetching: false,
                 errorMessage: null,
                 btnLoader: false,
                 categoryError: null,
@@ -34,10 +42,11 @@ export const errorReducer = (state = initialState, action) => {
             return {
                 ...state,
                 isLoading: false,
+                isBackgroundFetching: false,
                 errorMessage: action.payload,
                 btnLoader: false,
                 categoryLoader: false,
-            }
+            };
         case "CATEGORY_SUCCESS":
             return {
                 ...state,
@@ -50,7 +59,7 @@ export const errorReducer = (state = initialState, action) => {
                 categoryLoader: true,
                 categoryError: null,
                 errorMessage: null,
-            }
+            };
 
         default:
             return state;
