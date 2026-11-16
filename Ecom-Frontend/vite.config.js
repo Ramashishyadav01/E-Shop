@@ -15,7 +15,8 @@ export default defineConfig({
         manualChunks: {
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
           'vendor-redux': ['@reduxjs/toolkit', 'react-redux'],
-          'vendor-mui': ['@mui/material', '@mui/x-data-grid', '@emotion/react', '@emotion/styled'],
+          'vendor-mui': ['@mui/material', '@emotion/react', '@emotion/styled'],
+          'vendor-datagrid': ['@mui/x-data-grid'],
           'vendor-stripe': ['@stripe/react-stripe-js', '@stripe/stripe-js'],
           'vendor-swiper': ['swiper'],
         },

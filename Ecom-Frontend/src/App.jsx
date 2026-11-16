@@ -4,21 +4,21 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Navbar from './components/shared/Navbar'
 import { Toaster } from 'react-hot-toast'
 import Loader from './components/shared/Loader'
+import PrivateRoute from './components/PrivateRoute'
+import LogIn from './components/auth/LogIn'
+import Register from './components/auth/Register'
+import ForgotPassword from './components/auth/ForgotPassword'
+import AdminLayout from './components/admin/AdminLayout'
+import Dashboard from './components/admin/dashboard/Dashboard'
 
 const Home = lazy(() => import('./components/home/Home'))
 const Products = lazy(() => import('./components/products/Products'))
 const About = lazy(() => import('./components/About'))
 const Contact = lazy(() => import('./components/Contact'))
 const Cart = lazy(() => import('./components/cart/Cart'))
-const LogIn = lazy(() => import('./components/auth/LogIn'))
-const PrivateRoute = lazy(() => import('./components/PrivateRoute'))
-const Register = lazy(() => import('./components/auth/Register'))
-const ForgotPassword = lazy(() => import('./components/auth/ForgotPassword'))
 const Checkout = lazy(() => import('./components/checkout/Checkout'))
 const PaymentConfirmation = lazy(() => import('./components/checkout/PaymentConfirmation'))
 const Profile = lazy(() => import('./components/Profile'))
-const AdminLayout = lazy(() => import('./components/admin/AdminLayout'))
-const Dashboard = lazy(() => import('./components/admin/dashboard/Dashboard'))
 const AdminProducts = lazy(() => import('./components/admin/products/AdminProducts'))
 const Sellers = lazy(() => import('./components/admin/sellers/Sellers'))
 const Category = lazy(() => import('./components/admin/categories/Category'))

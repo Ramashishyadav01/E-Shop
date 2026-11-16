@@ -18,7 +18,7 @@ const Dashboard = () => {
     dispatch(analyticsAction());
    }, [dispatch]);
 
-   if (isLoading) {
+   if (isLoading && !productCount) {
     return <Loader />
    }
 

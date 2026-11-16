@@ -31,7 +31,7 @@ const UserMenu = () => {
     );
 
     const handleClick = (event) => {
-        setAnchorEl(event.currentTarget);
+        setAnchorEl((prev) => (prev ? null : event.currentTarget));
     };
 
     const handleClose = () => {
@@ -83,6 +83,9 @@ const UserMenu = () => {
                 anchorEl={anchorEl}
                 open={open}
                 onClose={handleClose}
+                disableScrollLock
+                disableAutoFocusItem
+                transitionDuration={100}
                 anchorOrigin={{
                     vertical: 'bottom',
                     horizontal: 'right',
@@ -94,10 +97,10 @@ const UserMenu = () => {
                 slotProps={{
                     paper: {
                         sx: {
-                            minWidth: 180,
+                            minWidth: 190,
                             mt: 1,
                             boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
-                            borderRadius: '8px',
+                            borderRadius: '10px',
                             overflow: 'visible',
                             zIndex: 9999,
                         }

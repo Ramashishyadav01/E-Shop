@@ -223,9 +223,16 @@ export const resetUserPassword
 };
 
 export const logOutUser = (navigate) => (dispatch) => {
-    dispatch({ type:"LOG_OUT" });
-    localStorage.removeItem("auth");
-    navigate("/login");
+    dispatch({ type: "LOG_OUT" });
+    try {
+        localStorage.removeItem("auth");
+        api.post("/auth/signout").catch(() => {});
+    } catch (e) {
+        // ignore
+    }
+    if (navigate) {
+        navigate("/login");
+    }
 };
 
 export const addUpdateUserAddress =
@@ -412,13 +419,16 @@ export const placeCODOrder = (sendData, toast, navigate, setLoading) => async (d
 
 export const analyticsAction = () => async (dispatch, getState) => {
         try {
-            dispatch({ type: "IS_FETCHING"});
+            const currentAnalytics = getState()?.admin?.analytics;
+            if (!currentAnalytics?.productCount) {
+                dispatch({ type: "IS_FETCHING" });
+            }
             const { data } = await api.get('/admin/app/analytics');
             dispatch({
                 type: "FETCH_ANALYTICS",
                 payload: data,
-            })
-            dispatch({ type: "IS_SUCCESS"});
+            });
+            dispatch({ type: "IS_SUCCESS" });
         } catch (error) {
             dispatch({ 
                 type: "IS_ERROR",

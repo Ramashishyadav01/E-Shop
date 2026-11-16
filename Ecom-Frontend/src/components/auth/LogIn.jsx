@@ -17,10 +17,16 @@ const LogIn = () => {
         register,
         handleSubmit,
         reset,
+        setValue,
         formState: { errors },
     } = useForm({
         mode: "onTouched",
     });
+
+    const quickFill = (username, password) => {
+        setValue("username", username, { shouldValidate: true, shouldDirty: true, shouldTouch: true });
+        setValue("password", password, { shouldValidate: true, shouldDirty: true, shouldTouch: true });
+    };
 
     const loginHandler = async (data) => {
         // data will automatically be formatted as { username: "x", password: "y" }
@@ -74,9 +80,41 @@ const LogIn = () => {
                     </div>
                 </div>
 
+                <div className="mt-4 mb-1">
+                    <p className="text-[11px] font-semibold text-slate-500 mb-1.5 text-center uppercase tracking-wider">
+                        Quick Fill Details:
+                    </p>
+                    <div className="grid grid-cols-3 gap-2">
+                        <button
+                            type="button"
+                            onClick={() => quickFill("user1", "password1")}
+                            className="py-1.5 px-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded border border-slate-300 transition flex items-center justify-center gap-1 cursor-pointer active:scale-95"
+                            title="Fill User: user1 / password1"
+                        >
+                            <span>👤 User</span>
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => quickFill("admin", "adminPass")}
+                            className="py-1.5 px-1 bg-purple-50 hover:bg-purple-100 text-purple-700 text-xs font-semibold rounded border border-purple-200 transition flex items-center justify-center gap-1 cursor-pointer active:scale-95"
+                            title="Fill Admin: admin / adminPass"
+                        >
+                            <span>🛡️ Admin</span>
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => quickFill("seller1", "password2")}
+                            className="py-1.5 px-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-medium rounded border border-emerald-200 transition flex items-center justify-center gap-1 cursor-pointer active:scale-95"
+                            title="Fill Seller: seller1 / password2"
+                        >
+                            <span>🏪 Seller</span>
+                        </button>
+                    </div>
+                </div>
+
                 <button
                     disabled={loader}
-                    className="bg-button-gradient flex gap-2 items-center justify-center font-semibold text-white w-full py-2 hover:text-slate-400 transition-colors duration-100 rounded-xs my-3 disabled:opacity-70"
+                    className="bg-button-gradient flex gap-2 items-center justify-center font-semibold text-white w-full py-2 hover:text-slate-400 transition-colors duration-100 rounded-xs my-3 disabled:opacity-70 cursor-pointer"
                     type="submit">
                     {loader ? (
                         <>

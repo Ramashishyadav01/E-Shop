@@ -9,7 +9,13 @@ const Sidebar = ({isProfileLayout = false}) => {
     const pathName = useLocation().pathname;
     const { user } = useSelector((state) => state.auth);
 
-    const isAdmin = user && user?.roles?.includes("ROLE_ADMIN");
+    const isAdmin = Boolean(
+        user && (
+            (Array.isArray(user?.roles) && (user.roles.includes("ROLE_ADMIN") || user.roles.includes("ADMIN"))) ||
+            user?.roles === "ROLE_ADMIN" ||
+            user?.role === "ADMIN"
+        )
+    );
 
     const sideBarLayout = isAdmin ? adminNavigation : sellerNavigation;
     
