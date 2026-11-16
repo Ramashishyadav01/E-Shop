@@ -1,42 +1,47 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
+import { Avatar, Menu, MenuItem } from '@mui/material';
 import { BiUser } from 'react-icons/bi';
 import { FaShoppingCart, FaUserShield } from 'react-icons/fa';
 import { IoExitOutline } from 'react-icons/io5';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { logOutUser } from '../store/actions';
 
 const UserMenu = () => {
-    const [open, setOpen] = useState(false);
-    const menuRef = useRef(null);
+    const [anchorEl, setAnchorEl] = useState(null);
+    const open = Boolean(anchorEl);
     const { user } = useSelector((state) => state.auth);
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const isAdmin = user && user?.roles?.includes("ROLE_ADMIN");
-    const isSeller = user && user?.roles?.includes("ROLE_SELLER");
+    const isAdmin = Boolean(
+        user && (
+            (Array.isArray(user?.roles) && (user.roles.includes("ROLE_ADMIN") || user.roles.includes("ADMIN"))) ||
+            user?.roles === "ROLE_ADMIN" ||
+            user?.role === "ADMIN"
+        )
+    );
 
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (menuRef.current && !menuRef.current.contains(event.target)) {
-                setOpen(false);
-            }
-        };
-        const handleKeyDown = (event) => {
-            if (event.key === "Escape") {
-                setOpen(false);
-            }
-        };
-        document.addEventListener("mousedown", handleClickOutside);
-        document.addEventListener("keydown", handleKeyDown);
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-            document.removeEventListener("keydown", handleKeyDown);
-        };
-    }, []);
+    const isSeller = Boolean(
+        user && (
+            (Array.isArray(user?.roles) && (user.roles.includes("ROLE_SELLER") || user.roles.includes("SELLER"))) ||
+            user?.roles === "ROLE_SELLER" ||
+            user?.role === "SELLER"
+        )
+    );
 
-    const toggleMenu = () => setOpen((prev) => !prev);
-    const handleClose = () => setOpen(false);
+    const handleClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+
+    const handleNavigate = (path) => {
+        handleClose();
+        navigate(path);
+    };
 
     const logOutHandler = () => {
         handleClose();
@@ -46,79 +51,101 @@ const UserMenu = () => {
     const initial = (user?.username || 'U').charAt(0).toUpperCase();
 
     return (
-        <div className='relative z-30' ref={menuRef}>
+        <div className='relative z-30'>
             <button
                 type="button"
                 aria-label="User menu"
+                aria-controls={open ? 'user-menu' : undefined}
                 aria-haspopup="true"
-                aria-expanded={open}
-                onClick={toggleMenu}
-                className='sm:border sm:border-slate-400 flex items-center justify-center rounded-full cursor-pointer hover:shadow-md transition text-slate-700 bg-white focus:outline-none'
+                aria-expanded={open ? 'true' : undefined}
+                onClick={handleClick}
+                className='sm:border sm:border-slate-400 flex items-center justify-center rounded-full cursor-pointer hover:shadow-md transition text-slate-700 bg-transparent focus:outline-none'
             >
-                {user?.avatarUrl ? (
-                    <img
-                        src={user.avatarUrl}
-                        alt={user?.username || 'User'}
-                        className='w-9 h-9 rounded-full object-cover'
-                        onError={(e) => {
-                            e.target.style.display = 'none';
-                            e.target.nextSibling.style.display = 'flex';
-                        }}
-                    />
-                ) : null}
-                <div
-                    style={{ display: user?.avatarUrl ? 'none' : 'flex' }}
-                    className='w-9 h-9 rounded-full bg-slate-300 text-slate-700 items-center justify-center font-bold text-sm select-none'
+                <Avatar 
+                    alt={user?.username || 'User'} 
+                    src={user?.avatarUrl || ''}
+                    sx={{
+                        width: 38,
+                        height: 38,
+                        bgcolor: '#cbd5e1',
+                        color: '#1e293b',
+                        fontWeight: 'bold',
+                        fontSize: '1rem',
+                        border: '1px solid #cbd5e1',
+                    }}
                 >
-                    {initial}
-                </div>
+                    {!user?.avatarUrl && initial}
+                </Avatar>
             </button>
 
-            {open && (
-                <div className='absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2 z-50 border border-gray-100 text-slate-700 animate-fadeIn'>
-                    <Link
-                        to="/profile"
-                        onClick={handleClose}
-                        className='flex items-center gap-2 px-4 py-2 hover:bg-gray-100 transition-colors'
+            <Menu
+                id="user-menu"
+                anchorEl={anchorEl}
+                open={open}
+                onClose={handleClose}
+                anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'right',
+                }}
+                transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                }}
+                slotProps={{
+                    paper: {
+                        sx: {
+                            minWidth: 180,
+                            mt: 1,
+                            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+                            borderRadius: '8px',
+                            overflow: 'visible',
+                            zIndex: 9999,
+                        }
+                    }
+                }}
+            >
+                <MenuItem 
+                    onClick={() => handleNavigate('/profile')}
+                    sx={{ gap: 1.5, py: 1 }}
+                >
+                    <BiUser className='text-xl text-slate-600'/>
+                    <span className='font-bold text-sm text-slate-800 truncate'>
+                        {user?.username}
+                    </span>
+                </MenuItem>
+
+                <MenuItem 
+                    onClick={() => handleNavigate('/profile/orders')}
+                    sx={{ gap: 1.5, py: 1 }}
+                >
+                    <FaShoppingCart className='text-xl text-slate-600'/>
+                    <span className='font-semibold text-sm text-slate-800'>
+                        Orders
+                    </span>
+                </MenuItem>
+
+                {(isAdmin || isSeller) && (
+                    <MenuItem 
+                        onClick={() => handleNavigate(isAdmin ? '/admin' : '/admin/orders')}
+                        sx={{ gap: 1.5, py: 1 }}
                     >
-                        <BiUser className='text-xl text-slate-600' />
-                        <span className='font-bold text-sm truncate'>{user?.username}</span>
-                    </Link>
+                        <FaUserShield className='text-xl text-slate-600'/>
+                        <span className='font-semibold text-sm text-slate-800'>
+                            {isAdmin ? "Admin Panel" : "Seller Panel"}
+                        </span>
+                    </MenuItem>
+                )}
 
-                    <Link
-                        to="/profile/orders"
-                        onClick={handleClose}
-                        className='flex items-center gap-2 px-4 py-2 hover:bg-gray-100 transition-colors'
-                    >
-                        <FaShoppingCart className='text-xl text-slate-600' />
-                        <span className='font-semibold text-sm'>Orders</span>
-                    </Link>
-
-                    {(isAdmin || isSeller) && (
-                        <Link
-                            to={isAdmin ? "/admin" : "/admin/orders"}
-                            onClick={handleClose}
-                            className='flex items-center gap-2 px-4 py-2 hover:bg-gray-100 transition-colors'
-                        >
-                            <FaUserShield className='text-xl text-slate-600' />
-                            <span className='font-semibold text-sm'>
-                                {isAdmin ? "Admin Panel" : "Seller Panel"}
-                            </span>
-                        </Link>
-                    )}
-
-                    <div className='pt-1 px-3'>
-                        <button
-                            type="button"
-                            onClick={logOutHandler}
-                            className='font-semibold w-full flex gap-2 items-center justify-center bg-button-gradient px-4 py-1.5 text-white rounded text-sm hover:opacity-95 transition'
-                        >
-                            <IoExitOutline className='text-lg' />
-                            <span>LogOut</span>
-                        </button>
+                <MenuItem 
+                    onClick={logOutHandler}
+                    sx={{ pt: 1, pb: 0.5 }}
+                >
+                    <div className='font-semibold w-full flex gap-2 items-center justify-center bg-button-gradient px-4 py-1.5 text-white rounded text-sm hover:opacity-95 transition'>
+                        <IoExitOutline className='text-lg'/>
+                        <span>LogOut</span>
                     </div>
-                </div>
-            )}
+                </MenuItem>
+            </Menu>
         </div>
     );
 };

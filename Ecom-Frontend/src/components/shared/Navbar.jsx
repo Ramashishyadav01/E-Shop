@@ -12,6 +12,7 @@ const Navbar = () => {
     const { cart } = useSelector((state) => state.carts);
     const { user } = useSelector((state) => state.auth);
     const cartCount = cart?.length || 0;
+    const isLoggedIn = Boolean(user && (user.id || user._id || user.username));
     
     return (
         <div className="h-[70px] bg-custom-gradient text-white z-50 flex items-center sticky top-0 shadow-sm">
@@ -22,7 +23,7 @@ const Navbar = () => {
                 </Link>
 
             <ul className={`flex sm:gap-10 gap-4 sm:items-center text-slate-800 sm:static absolute left-0 top-[70px] sm:shadow-none shadow-md ${
-            navbarOpen ? "h-fit sm:pb-0 pb-5" : "h-0 overflow-hidden"
+            navbarOpen ? "h-fit sm:pb-0 pb-5" : "h-0 overflow-hidden sm:h-auto sm:overflow-visible"
           } transition-all duration-100 sm:h-fit sm:bg-none bg-custom-gradient text-white sm:w-fit w-full sm:flex-row flex-col px-4 sm:px-0`}>
                 <li className="font-medium transition-all duration-150">
                    <Link className={`${
@@ -74,7 +75,7 @@ const Navbar = () => {
                    </Link> 
                 </li>
 
-                {(user && user.id) ? (
+                {isLoggedIn ? (
                     <li className="font-medium transition-all duration-150">
                         <UserMenu />
                     </li>
